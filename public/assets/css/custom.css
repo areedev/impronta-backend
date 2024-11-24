@@ -1,0 +1,43 @@
+.topbar {
+    background: #084063;
+}
+
+.topbar .navbar .navbar-nav .nav-item .nav-link {
+    color: #fff;
+}
+
+.topbar .navbar .navbar-nav.quick-links .nav-item .nav-link:hover,
+.topbar .navbar .navbar-nav .nav-item .nav-link:hover {
+    color: #49beff !important;
+}
+.navbar-collapse {
+    flex-grow: 0;
+}
+
+.nav-icon-hover {
+    color: #ffffff;
+}
+.nav-icon-hover:hover {
+    color: #49beff !important;
+}
+
+.table-responsive thead tr th {
+    background-color: #ddebff;
+}
+
+body div.dt-buttons > .dt-button,
+body div.dt-buttons > div.dt-button-split .dt-button {
+    background: var(--bs-primary);
+    border-radius: 7px;
+    background-color: var(--bs-primary);
+    border: 1px solid var(--bs-primary);
+    color: #fff;
+}
+body div.dt-buttons > .dt-button:hover,
+body div.dt-buttons > div.dt-button-split .dt-button:hover {
+    background: var(--bs-primary) !important;
+    border-radius: 7px !important;
+    background-color: var(--bs-primary) !important;
+    border: 1px solid var(--bs-primary) !important;
+    color: #fff !important;
+}
