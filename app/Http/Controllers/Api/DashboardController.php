@@ -30,6 +30,7 @@ class DashboardController extends BaseApiController
         $data['aprobaciones'] = Aprobacion::when(!Auth::user()->hasRole(['administrador', 'evaluador']), function ($query) {
             return $query->whereRelation('evaluacion', 'empresa_id', Auth::user()->perfil->empresa->id);
         })->select('estado', DB::raw('count(*) as count'))->groupBy('estado')->pluck('count');
+        $data['perfil'] = Perfil::where('user_id', Auth::id())->first();
         return $this->sendResponse($data, 'Fetched data successfully');
     }
 }
