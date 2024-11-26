@@ -30,6 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/candidates', [CandidateController::class, 'index']);
     Route::get('/candidate/{id}', [CandidateController::class, 'show']);
+    Route::post('/candidate', [CandidateController::class, 'create']);
+    Route::delete('/candidate/{id}', [CandidateController::class, 'destroy']);
     Route::get('/evaluations', [EvaluationController::class, 'index']);
     Route::get('/profiles', [ProfileController::class, 'index']);
     Route::get('/companies', [CompanyController::class, 'index']);
