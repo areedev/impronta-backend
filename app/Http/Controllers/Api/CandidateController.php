@@ -24,7 +24,7 @@ class CandidateController extends BaseApiController
     }
     public function show($id)
     {
-        $candidate = Candidato::select('id', 'nombre', 'email', 'telefono', 'estado', 'foto', 'empresa_id')->find($id);
+        $candidate = Candidato::select('*')->find($id);
         if (is_null($candidate)) {
             return $this->sendError('Candidate not found.');
         }
