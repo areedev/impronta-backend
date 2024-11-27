@@ -46,6 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/profile/{id}', [ProfileEvaluationController::class, 'destroy']);
     Route::get('/profile/edit/{id}', [ProfileEvaluationController::class, 'edit']);
     Route::get('/companies', [CompanyController::class, 'index']);
+    Route::get('/company/{id}', [CompanyController::class, 'edit']);
+    Route::post('/company/{id}', [CompanyController::class, 'store']);
+    Route::delete('/company/{id}', [CompanyController::class, 'destroy']);
 });
 Route::fallback(function(){
     return response()->json(['message' => 'Not found'], 404);
