@@ -50,7 +50,7 @@ class EmpresaController extends Controller
             'nombre' => 'required',
             'rut' => 'required|cl_rut',
             'contacto' => 'required',
-            'usuario' => 'nullable|exist:users,id',
+            'usuario' => 'nullable|exists:users,id',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:3000'
         ]);
 
