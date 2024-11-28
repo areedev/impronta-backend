@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\EvaluationController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProfileEvaluationController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/evaluations', [EvaluationController::class, 'store']);
     Route::get('/evaluations/practice/{id}', [EvaluationController::class, 'practice']);
     Route::get('/evaluations/validate', [EvaluationController::class, 'validar']);
-    Route::get('/profiles', [ProfileController::class, 'index']);
+    Route::get('/profiles', [ProfileEvaluationController::class, 'index']);
     Route::post('/profile', [ProfileEvaluationController::class, 'store']);
     Route::post('/profile/update/{id}', [ProfileEvaluationController::class, 'update']);
     Route::post('/profile/new-section', [ProfileEvaluationController::class, 'nueva_seccion']);
@@ -49,6 +50,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/company/{id}', [CompanyController::class, 'edit']);
     Route::post('/company/{id}', [CompanyController::class, 'store']);
     Route::delete('/company/{id}', [CompanyController::class, 'destroy']);
+
+    Route::get('/user', [ProfileController::class, 'index']);
+    Route::post('/user', [ProfileController::class, 'update']);
+    Route::post('/user-password', [ProfileController::class, 'updatePassword']);
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+
 });
 Route::fallback(function(){
     return response()->json(['message' => 'Not found'], 404);
