@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/evaluations', [EvaluationController::class, 'index']);
     Route::post('/evaluations', [EvaluationController::class, 'store']);
     Route::get('/evaluations/practice/{id}', [EvaluationController::class, 'practice']);
+    Route::post('/evaluations/notas/{id}', [EvaluationController::class, 'notas']);
     Route::get('/evaluations/validate', [EvaluationController::class, 'validar']);
     Route::get('/profiles', [ProfileEvaluationController::class, 'index']);
     Route::post('/profile', [ProfileEvaluationController::class, 'store']);

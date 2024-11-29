@@ -28,6 +28,17 @@ class CandidateController extends BaseApiController
         if (is_null($candidate)) {
             return $this->sendError('Candidate not found.');
         }
+        $candidate->bitacora;
+        $candidate->bitacora->each(function ($log) {
+            $log->empresa_antigua = $log->empresa_antigua;
+            $log->empresa_nueva = $log->empresa_nueva;
+        });
+        $candidate->evaluaciones;
+        $candidate->evaluaciones->each(function ($evaluacion) {
+            $evaluacion->perfilEvaluacion;
+            $evaluacion->aprobacion;
+            $evaluacion->teorica;
+        });
         $empresa = Empresa::find($candidate->empresa_id);
         $empresaIds = Bitacora::where('candidato_id', $id)->pluck('empresa_nueva_id');
         $empresas = Empresa::whereIn('id', $empresaIds)->get();

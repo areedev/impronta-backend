@@ -23,6 +23,13 @@ use App\Notifications\NotificacionGeneral;
 
 class ProfileEvaluationController extends BaseApiController
 {
+    public function index()
+    {
+        $candidates = PerfilEvaluacion::select()
+            ->get();
+        return $this->sendResponse($candidates, 'Fetched data successfully');
+    }
+    
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
