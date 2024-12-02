@@ -10,6 +10,11 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProfileEvaluationController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\AreaController;
+use App\Http\Controllers\Api\CompetencyController;
+use App\Http\Controllers\Api\CriteriaController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,9 +41,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/candidate/{id}', [CandidateController::class, 'destroy']);
     Route::get('/evaluations', [EvaluationController::class, 'index']);
     Route::post('/evaluations', [EvaluationController::class, 'store']);
+    Route::get('/evaluations/ver/{id}', [EvaluationController::class, 'show']);
     Route::get('/evaluations/practice/{id}', [EvaluationController::class, 'practice']);
+    Route::get('/evaluations/comment/{id}', [EvaluationController::class, 'comment']);
+    Route::post('/evaluations/comment/{id}', [EvaluationController::class, 'save_comment']);
     Route::post('/evaluations/notas/{id}', [EvaluationController::class, 'notas']);
     Route::get('/evaluations/validate', [EvaluationController::class, 'validar']);
+    Route::get('/evaluations/theory/{id}', [EvaluationController::class, 'teorica']);
+    Route::post('/evaluations/theory-update/{id}', [EvaluationController::class, 'teorica_update']);
+    Route::post('/evaluations/theory-create/{id}', [EvaluationController::class, 'teorica_store']);
+    Route::get('/evaluations/result/{id}', [EvaluationController::class, 'resultados']);
+    Route::post('evaluations/status/{id}', [EvaluationController::class, 'actualizar_estado']);
+
     Route::get('/profiles', [ProfileEvaluationController::class, 'index']);
     Route::post('/profile', [ProfileEvaluationController::class, 'store']);
     Route::post('/profile/update/{id}', [ProfileEvaluationController::class, 'update']);
@@ -57,6 +71,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-password', [ProfileController::class, 'updatePassword']);
 
     Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::resource('/tasks', TaskController::class);
+    Route::resource('/areas', AreaController::class);
+    Route::resource('/competencies', CompetencyController::class);
+    Route::resource('/criterias', CriteriaController::class);
+    Route::resource('/users', UserController::class);
 
 });
 Route::fallback(function(){
