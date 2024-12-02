@@ -10,7 +10,11 @@ use App\Models\Area;
 use App\Models\Evaluacion;
 use App\Models\Aprobacion;
 use App\Models\PerfilEvaluacion;
+use App\Models\Competencia;
+use App\Models\EvaluacionTeorica;
+use App\Models\TipoCompetencia;
 use App\Models\ResultadoEvaluacion;
+use App\Models\ItemEvaluacionTeorica;
 use App\Models\CriterioDesempeñoInternoEvaluacion;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -55,20 +59,43 @@ class EvaluationController extends BaseApiController
     }
     public function show($id)
     {
-        $candidate = Candidato::select('id', 'nombre', 'email', 'telefono', 'estado', 'foto', 'empresa_id')->find($id);
-        if (is_null($candidate)) {
-            return $this->sendError('Candidate not found.');
-        }
-        $empresa = Empresa::find($candidate->empresa_id);
-        $empresaIds = Bitacora::where('candidato_id', $id)->pluck('empresa_nueva_id');
-        $empresas = Empresa::whereIn('id', $empresaIds)->get();
-        $evaluaciones = Evaluacion::where('candidato_id', $id)->get();
-        return $this->sendResponse([
-            'candidate' => $candidate,
-            'empresa' => $empresa,
-            'empresas' => $empresas,
-            'evaluaciones' => $evaluaciones
-        ], 'Fetched data successfully');
+        $evaluacion = Evaluacion::find($id);
+        $evaluacion->candidato;
+        $evaluacion->candidato->empresa;
+        $evaluacion->empresa;
+
+
+        $evaluacion->perfilEvaluacion;
+        $evaluacion->teorica;
+        $evaluacion->resultado;
+        $evaluacion->criterios;
+        $evaluacion->faena;
+        $evaluacion->area;
+
+        $evaluacion->nota_total = $evaluacion->getNotaTotalAttribute();
+        $evaluacion->porcentaje_total = $evaluacion->getPorcentajeTotalAttribute();
+        $evaluacion->teorica->nota_total = $evaluacion->teorica->getNotaTotalAttribute();
+        $evaluacion->teorica->porcentaje_total = $evaluacion->teorica->getPorcentajeTotalAttribute();
+
+        $evaluacion->teorica->items = $evaluacion->teorica->items;
+        $evaluacion->teorica->items->each(function($item) {
+            $item->competencia;
+        });
+        $evaluacion->teorica->porcentaje_teorica = $evaluacion->teorica->getPorcentajeTeoricaAttribute();
+        $evaluacion->nota_practica = $evaluacion->getNotaPracticaAttribute();
+        $evaluacion->porcentaje_practica = $evaluacion->getPorcentajePracticaAttribute();
+        $evaluacion->perfilEvaluacion->secciones;
+        $evaluacion->perfilEvaluacion->secciones->each(function ($section) {
+            $section->items;
+            $section->items->each(function ($item) {
+                $item->competencia;
+                $item->competencia->criterios;
+
+            });
+        });
+
+        $tipos = TipoCompetencia::get();
+        return $this->sendResponse($evaluacion, 'Fetched data successfully');
     }
     function practice($id)
     {
@@ -92,6 +119,63 @@ class EvaluationController extends BaseApiController
             
         ], 'Fetched data successfully');
     }
+
+    function comment($id)
+    {
+        $evaluacion = Evaluacion::find($id);
+
+        // Lazy load the perfilEvaluacion relationship
+        $evaluacion->perfilEvaluacion;
+        $evaluacion->resultado;
+        $evaluacion->criterios;
+        $evaluacion->nota_practica = $evaluacion->getNotaPracticaAttribute();
+        $evaluacion->porcentaje_practica = $evaluacion->getPorcentajePracticaAttribute();
+        $evaluacion->perfilEvaluacion->secciones;
+        $evaluacion->perfilEvaluacion->secciones->each(function ($section) {
+            $section->items;
+            $section->items->each(function ($item) {
+                $item->competencia;
+                $item->competencia->criterios;
+
+            });
+        });
+        return $this->sendResponse([
+            'evaluacion' => $evaluacion,
+            
+        ], 'Fetched data successfully');
+    }
+
+    function save_comment(Request $request, $id)
+    {
+        $evaluacion = Evaluacion::find($id);
+        $evaluacion->comentarios = $request->comentarios;
+        $evaluacion->estado = $request->estado_evaluacion;
+        if ($evaluacion->save()) {
+            if ($request->hasFile('firma_evaluador')) {
+                $firma_evaluador = $request->file('firma_evaluador');
+                $fileName = pathinfo($firma_evaluador->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName = str_replace(' ', '-', $fileName); // Replaces all spaces with hyphens.
+                $fileName = preg_replace('/[^A-Za-z0-9\-]/', '', $fileName); // Removes special chars.
+                $fileName = time() . '_' . $fileName . '.' . $firma_evaluador->getClientOriginalExtension();
+                $filePath = $firma_evaluador->storeAs('evaluacion/' . $evaluacion->id . '/firmas/', $fileName, 'publico');
+                $evaluacion->firma_evaluador = $fileName;
+                $evaluacion->save();
+            }
+            if ($request->hasFile('firma_supervisor')) {
+                $firma_supervisor = $request->file('firma_supervisor');
+                $fileName = pathinfo($firma_supervisor->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName = str_replace(' ', '-', $fileName); // Replaces all spaces with hyphens.
+                $fileName = preg_replace('/[^A-Za-z0-9\-]/', '', $fileName); // Removes special chars.
+                $fileName = time() . '_' . $fileName . '.' . $firma_supervisor->getClientOriginalExtension();
+                $filePath = $firma_supervisor->storeAs('evaluacion/' . $evaluacion->id . '/firmas/', $fileName, 'publico');
+                $evaluacion->firma_supervisor = $fileName;
+                $evaluacion->save();
+            }
+        }
+        return $this->sendResponse('', 'Saved successfully');
+        // return redirect()->route('evaluaciones.index')->with('success',  'Datos guardados');
+    }
+
     function validar(Request $request)
     {
         $this->validate($request, [
@@ -288,5 +372,191 @@ class EvaluationController extends BaseApiController
         }
 
         $aprobacion->save();
+    }
+
+    function teorica(Request $request, $id)
+    {
+        $teorica = EvaluacionTeorica::where('evaluacion_id', $id)->get()->first();
+        if ($teorica) {
+            $teorica->items;
+            $teorica->items->each(function($item) {
+                $item->competencia;
+            });
+        }
+        $competencias = Competencia::get();
+        $evaluacion = Evaluacion::find($id);
+        $tipos = TipoCompetencia::select()->get();
+        return $this->sendResponse([
+            'teorica' => $teorica,
+            'evaluacion' => $evaluacion,
+            'tipos' => $tipos,
+            'competencias' => $competencias
+        ], 'fetched successfully');
+    }
+
+    function nueva_pregunta()
+    {
+        
+    }
+
+    function teorica_store(Request $request, $id)
+    {
+
+        /*foreach ($request->competencia as $llavecompetencia => $competencia) {
+
+            echo $competencia . ', ' . (isset($request->pregunta[$llavecompetencia]) ? $request->pregunta[$llavecompetencia] : 'nada') . ', ' . (isset($request->comentario[$llavecompetencia]) ? $request->comentario[$llavecompetencia] : 'nada') . '<br>';
+        }
+        return;*/
+
+        $validator = Validator::make($request->all(), [
+            'preguntas' => 'required|integer',
+            'preguntas_buenas' => 'required|integer',
+            'nota' => 'required|max_decimal',
+            'pregunta' => 'required',
+            'competencia.*' => 'required',
+            'archivo' => 'required|mimes:doc,docx,xls,xlsx,ppt,pptx,pdf,jpeg,png,gif,bmp',
+        ]);
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors(), 422);
+        }
+        $teorica = new EvaluacionTeorica();
+        $teorica->evaluacion_id = $id;
+        $teorica->preguntas = $request->preguntas;
+        $teorica->preguntas_buenas = $request->preguntas_buenas;
+        $nota = str_replace(',', '.', $request->nota);
+        $teorica->nota = $nota;
+        if ($teorica->save()) {
+            if ($request->hasFile('archivo')) {
+                $archivo = $request->file('archivo');
+                $fileName = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName = str_replace(' ', '-', $fileName); // Replaces all spaces with hyphens.
+                $fileName = preg_replace('/[^A-Za-z0-9\-]/', '', $fileName); // Removes special chars.
+                $fileName = time() . '_' . $fileName . '.' . $archivo->getClientOriginalExtension();
+                $filePath = $archivo->storeAs('evaluacion/' . $id . '/teorica/', $fileName, 'publico');
+                $teorica->archivo = $fileName;
+                $teorica->save();
+            }
+            foreach ($request->competencia as $llavecompetencia => $competencia) {
+                $item = new ItemEvaluacionTeorica();
+                $item->evaluacion_id = $id;
+                $item->competencia_id = $competencia;
+                $item->pregunta = isset($request->pregunta[$llavecompetencia]) ? $request->pregunta[$llavecompetencia] : null;
+                $item->comentario = isset($request->comentario[$llavecompetencia]) ? $request->comentario[$llavecompetencia] : null;
+                $item->save();
+            }
+            $this->aprobacion($id);
+            $notificacion = [
+                'notificacion' => 'Se asigno una evaluación teorica a la evaluación #' . $id . '.',
+                'url' => route('evaluaciones.show', $id)
+            ];
+            $usuariosNot = User::where('notificaciones', true)->get();
+            foreach ($usuariosNot as $usuariosNotificacion) {
+                $usuariosNotificacion->notify(new NotificacionGeneral($notificacion));
+            }
+            return $this->sendResponse('success', 'Saved Successfully');
+        } else {
+            return $this->sendError('Error', 'Failed to save teorica', 400);
+        }
+    }
+
+    function teorica_update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'preguntas' => 'required|integer',
+            'preguntas_buenas' => 'required|integer',
+            'nota' => 'required|max_decimal',
+            'pregunta' => 'required',
+            'competencia.*' => 'required',
+            'archivo' => 'nullable|mimes:doc,docx,xls,xlsx,ppt,pptx,pdf,jpeg,png,gif,bmp',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error.', $validator->errors(), 422);
+        }
+        $teorica = EvaluacionTeorica::where('evaluacion_id', $id)->get()->first();
+        $teorica->evaluacion_id = $id;
+        $teorica->preguntas = $request->preguntas;
+        $teorica->preguntas_buenas = $request->preguntas_buenas;
+        $nota = str_replace(',', '.', $request->nota);
+        $teorica->nota = $nota;
+        if ($teorica->save()) {
+            if ($request->hasFile('archivo')) {
+                $archivo = $request->file('archivo');
+                $fileName = pathinfo($archivo->getClientOriginalName(), PATHINFO_FILENAME);
+                $fileName = str_replace(' ', '-', $fileName); // Replaces all spaces with hyphens.
+                $fileName = preg_replace('/[^A-Za-z0-9\-]/', '', $fileName); // Removes special chars.
+                $fileName = time() . '_' . $fileName . '.' . $archivo->getClientOriginalExtension();
+                $filePath = $archivo->storeAs('evaluacion/' . $id . '/teorica/', $fileName, 'publico');
+                $teorica->archivo = $fileName;
+                $teorica->save();
+            }
+            $claves = array_keys($request->competencia);
+            ItemEvaluacionTeorica::whereNotIn('competencia_id', $claves)->where('evaluacion_id', $id)->delete();
+            foreach ($request->competencia as $llavecompetencia => $competencia) {
+                ItemEvaluacionTeorica::updateOrCreate(
+                    ['evaluacion_id' => $id, 'competencia_id' => $competencia],
+                    ['evaluacion_id' => $id, 'competencia_id' => isset($request->competencia[$llavecompetencia]) ? $request->competencia[$llavecompetencia] : null, 'pregunta' => isset($request->pregunta[$llavecompetencia]) ? $request->pregunta[$llavecompetencia] : null, 'comentario' => isset($request->comentario[$llavecompetencia]) ? $request->comentario[$llavecompetencia] : null]
+                );
+            }
+            return $this->sendResponse('success', 'Saved Successfully');
+        } else {
+            return $this->sendError('Error', 'Failed to save teorica', 400);
+        }
+    }
+
+    function resultados($id)
+    {
+        $evaluacion = Evaluacion::find($id);
+
+        // Lazy load the perfilEvaluacion relationship
+        $evaluacion->perfilEvaluacion;
+        $evaluacion->resultado;
+        $evaluacion->criterios;
+        $evaluacion->teorica;
+
+        $evaluacion->nota_total = $evaluacion->getNotaTotalAttribute();
+        $evaluacion->porcentaje_total = $evaluacion->getPorcentajeTotalAttribute();
+        $evaluacion->teorica->nota_total = $evaluacion->teorica->getNotaTotalAttribute();
+        $evaluacion->teorica->porcentaje_total = $evaluacion->teorica->getPorcentajeTotalAttribute();
+
+        $evaluacion->teorica->items = $evaluacion->teorica->items;
+        $evaluacion->teorica->items->each(function($item) {
+            $item->competencia;
+        });
+        $evaluacion->teorica->porcentaje_teorica = $evaluacion->teorica->getPorcentajeTeoricaAttribute();
+        $evaluacion->nota_practica = $evaluacion->getNotaPracticaAttribute();
+        $evaluacion->porcentaje_practica = $evaluacion->getPorcentajePracticaAttribute();
+        $evaluacion->perfilEvaluacion->secciones;
+        $evaluacion->perfilEvaluacion->secciones->each(function ($section) {
+            $section->items;
+            $section->items->each(function ($item) {
+                $item->competencia;
+                $item->competencia->criterios;
+
+            });
+        });
+
+        $tipos = TipoCompetencia::get();
+        
+        if ($evaluacion) {
+            return $this->sendResponse(['tipos' => $tipos, 'evaluacion' => $evaluacion], 'fetched successfully');
+        } else {
+            return $this->sendError('Not found', 'invalid evaluation', '');
+        }
+    }
+
+    function actualizar_estado(Request $request, $id)
+    {
+        $this->validate($request, [
+            'estado_evaluacion' => 'required|in:0,1,2',
+        ]);
+
+        $evaluacion = Evaluacion::find($id);
+        $evaluacion->estado = $request->estado_evaluacion;
+        if ($evaluacion->save()) {
+            return $this->sendResponse($evaluacion, 'Estado de evaluación actualizado');
+        } else {
+            return $this->sendError('Failed', 'Failed to save stuats', 400);
+        }
     }
 }
