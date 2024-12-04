@@ -122,7 +122,7 @@
                             <div class="mb-3">
                                 {{ Form::label('firma_evaluador', 'Firma del evaluador', ['class' => 'form-label']) }}
                                 @if ($evaluacion->firma_evaluador)
-                                    <a href="{{ asset('uploads/evaluaciones/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_evaluador . '') }}"
+                                    <a href="{{ asset('uploads/evaluacion/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_evaluador . '') }}"
                                         target="_blank" class="text-center rounded-1 bg-info text-white p-1 fs-1 ms-2">
                                         <i class="ti ti-eye"></i>
                                     </a>
@@ -132,7 +132,7 @@
                             <div class="mb-3">
                                 {{ Form::label('firma_supervisor', 'Firma del supervisor', ['class' => 'form-label']) }}
                                 @if ($evaluacion->firma_supervisor)
-                                    <a href="{{ asset('uploads/evaluaciones/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_supervisor . '') }}"
+                                    <a href="{{ asset('uploads/evaluacion/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_supervisor . '') }}"
                                         target="_blank" class="text-center rounded-1 bg-info text-white p-1 fs-1 ms-2">
                                         <i class="ti ti-eye"></i>
                                     </a>

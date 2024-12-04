@@ -453,13 +453,13 @@
                             <div class="mb-3">
                                 <div class="btn-group" role="group">
                                     @if ($evaluacion->firma_evaluador)
-                                        <a href="{{ asset('uploads/evaluaciones/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_evaluador . '') }}"
+                                        <a href="{{ asset('uploads/evaluacion/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_evaluador . '') }}"
                                             target="_blank" class="btn btn-info text-center text-white p-2">
                                             Firma del evaluador
                                         </a>
                                     @endif
                                     @if ($evaluacion->firma_supervisor)
-                                        <a href="{{ asset('uploads/evaluaciones/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_supervisor . '') }}"
+                                        <a href="{{ asset('uploads/evaluacion/' . $evaluacion->id . '/firmas/' . $evaluacion->firma_supervisor . '') }}"
                                             target="_blank" class="btn btn-primary text-center text-white p-2">
                                             Firma del supervisor
                                         </a>

@@ -36,6 +36,7 @@ class EvaluationController extends BaseApiController
             $e->aprobacion;
             $e->perfilEvaluacion;
             $e->teorica;
+            $e->resultado;
         });
         $candidates = Evaluacion::select('e.*', 'p.nombre as faena_name', 'c.nombre as company_name', 'a.estado as approval_status')
             ->from('evaluaciones as e')
