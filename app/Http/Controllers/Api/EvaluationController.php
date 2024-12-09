@@ -386,6 +386,7 @@ class EvaluationController extends BaseApiController
         }
         $competencias = Competencia::get();
         $evaluacion = Evaluacion::find($id);
+        $evaluacion->resultado;
         $tipos = TipoCompetencia::select()->get();
         return $this->sendResponse([
             'teorica' => $teorica,
@@ -517,14 +518,16 @@ class EvaluationController extends BaseApiController
 
         $evaluacion->nota_total = $evaluacion->getNotaTotalAttribute();
         $evaluacion->porcentaje_total = $evaluacion->getPorcentajeTotalAttribute();
-        $evaluacion->teorica->nota_total = $evaluacion->teorica->getNotaTotalAttribute();
-        $evaluacion->teorica->porcentaje_total = $evaluacion->teorica->getPorcentajeTotalAttribute();
+        if ($evaluacion->teorica) {
+            $evaluacion->teorica->nota_total = $evaluacion->teorica->getNotaTotalAttribute();
+            $evaluacion->teorica->porcentaje_total = $evaluacion->teorica->getPorcentajeTotalAttribute();
 
-        $evaluacion->teorica->items = $evaluacion->teorica->items;
-        $evaluacion->teorica->items->each(function($item) {
-            $item->competencia;
-        });
-        $evaluacion->teorica->porcentaje_teorica = $evaluacion->teorica->getPorcentajeTeoricaAttribute();
+            $evaluacion->teorica->items = $evaluacion->teorica->items;
+            $evaluacion->teorica->items->each(function($item) {
+                $item->competencia;
+            });
+            $evaluacion->teorica->porcentaje_teorica = $evaluacion->teorica->getPorcentajeTeoricaAttribute();
+        }
         $evaluacion->nota_practica = $evaluacion->getNotaPracticaAttribute();
         $evaluacion->porcentaje_practica = $evaluacion->getPorcentajePracticaAttribute();
         $evaluacion->perfilEvaluacion->secciones;
