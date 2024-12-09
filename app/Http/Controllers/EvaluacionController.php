@@ -437,8 +437,9 @@ class EvaluacionController extends Controller
 
     public function public_pdf($id)
     {
-        $decryptedId = Crypt::decrypt($id);
-        $url = route('pdfpublico', $id);
+        $encryptedId = Crypt::encrypt($id);
+        $decryptedId = Crypt::decrypt($encryptedId);
+        $url = route('pdfpublico', $decryptedId);
         $qr = QrCode::size(150)->generate($url);
         $qrCodeBase64 = 'data:image/png;base64,' . base64_encode($qr);
         $data['perfiles'] = PerfilEvaluacion::pluck('nombre', 'id');
