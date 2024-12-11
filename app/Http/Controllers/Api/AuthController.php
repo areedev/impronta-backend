@@ -48,6 +48,7 @@ class AuthController extends BaseApiController
         return $this->sendResponse([
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'is_admin' => $user->hasRole(1),
         ], 'Login Successfully');
     }
 

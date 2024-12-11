@@ -27,7 +27,11 @@ class EvaluationController extends BaseApiController
 {
     public function index()
     {
-        $evaluations = Evaluacion::select()->get();
+        if (Auth::user()->hasRole(['administrador', 'evaluador']))
+            $evaluations = Evaluacion::select()->get();
+        else
+            $evaluations = Evaluacion::where('empresa_id', Auth::user()->perfil->empresa->id)->select()->get();
+        
         $evaluations->each(function($e) {
             $e->candidato;
             $e->faena;
@@ -38,12 +42,12 @@ class EvaluationController extends BaseApiController
             $e->teorica;
             $e->resultado;
         });
-        $candidates = Evaluacion::select('e.*', 'p.nombre as faena_name', 'c.nombre as company_name', 'a.estado as approval_status')
-            ->from('evaluaciones as e')
-            ->join('faenas as p', 'e.faena_id', '=', 'p.id')
-            ->join('empresas as c', 'e.empresa_id', '=', 'c.id')
-            ->join('aprobaciones as a', 'a.evaluacion_id', '=', 'e.id')
-            ->get();
+        // $candidates = Evaluacion::select('e.*', 'p.nombre as faena_name', 'c.nombre as company_name', 'a.estado as approval_status')
+        //     ->from('evaluaciones as e')
+        //     ->join('faenas as p', 'e.faena_id', '=', 'p.id')
+        //     ->join('empresas as c', 'e.empresa_id', '=', 'c.id')
+        //     ->join('aprobaciones as a', 'a.evaluacion_id', '=', 'e.id')
+        //     ->get();
         $empresas = Empresa::select()->get();
         $faenas = Faena::select()->get();
         $areas = Area::select()->get();
@@ -51,7 +55,7 @@ class EvaluationController extends BaseApiController
 
         return $this->sendResponse([
             'evaluations' => $evaluations,
-            'candidates' => $candidates, 
+            // 'candidates' => $candidates, 
             'empresas' => $empresas, 
             'faenas' => $faenas, 
             'areas' => $areas,
@@ -226,9 +230,9 @@ class EvaluationController extends BaseApiController
         $nuevo->perfil_evaluacion_id = $request->perfil_evaluacion;
         $nuevo->cargo  = $request->cargo;
         $nuevo->evaluador_asignado  = $request->evaluador;
-        $nuevo->fecha_solicitud = $request->fecha_solicitud;
-        $nuevo->fecha_ejecucion = $request->fecha_ejecucion;
-        $nuevo->fecha_emision  = $request->fecha_emision;
+        $nuevo->fecha_solicitud = $request->fecha_solicitud == '' ? NULL : $request->fecha_solicitud;
+        $nuevo->fecha_ejecucion = $request->fecha_ejecucion == '' ? NULL : $request->fecha_ejecucion;
+        $nuevo->fecha_emision  = $request->fecha_emision == '' ? NULL : $request->fecha_emision;
         $nuevo->certificado  = $request->certificado;
         $nuevo->equipo  = $request->equipo;
         $nuevo->marca  = $request->marca;
@@ -561,6 +565,15 @@ class EvaluationController extends BaseApiController
             return $this->sendResponse($evaluacion, 'Estado de evaluación actualizado');
         } else {
             return $this->sendError('Failed', 'Failed to save stuats', 400);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $evaluacion = Evaluacion::find($id);
+        if ($evaluacion) {
+            $evaluacion->delete();
+            return $this->sendResponse('success',  'Evaluación eliminada');
         }
     }
 }

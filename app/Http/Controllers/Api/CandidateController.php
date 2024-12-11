@@ -16,9 +16,13 @@ class CandidateController extends BaseApiController
 {
     public function index()
     {
-        $candidates = Candidato::select('c.*', 'e.id as empresa_id', 'e.nombre as empresa_name')
-        ->from('candidatos as c')
-        ->leftJoin('empresas as e', 'c.empresa_id', '=', 'e.id')->get();
+        if (Auth::user()->hasRole(['administrador', 'evaluador']))
+            $candidates = Candidato::get();
+        else
+            $candidates = Candidato::where('empresa_id', Auth::user()->perfil->empresa->id)->get();
+        $candidates->each(function($candidate) {
+            $candidate->empresa;
+        });
         $empresas = Empresa::get();
         return $this->sendResponse(['candidates' => $candidates, 'empresas' => $empresas], 'Fetched data successfully');
     }

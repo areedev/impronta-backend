@@ -57,6 +57,7 @@ class UserController extends Controller
         $perfil->telefono = $request->telefono;
         $perfil->save();
 
+        $empresa = Empresa::find($request->empresa);
         $empresa->user_id = $userid;
         $empresa->save();
 
