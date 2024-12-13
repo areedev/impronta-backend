@@ -245,7 +245,7 @@
                                 <td colspan="2" style="background:#084063; color:white;">
                                     -
                                     {{ $criterio->criterio }}
-                                    @if ($resultadocriterio->comentarios)
+                                    @if ($resultadocriterio && $resultadocriterio->comentarios)
                                         <hr>
                                         <p><span style="font-weight:bold">Comentarios:</span>
                                             {{ $resultadocriterio->comentarios }}</p>
