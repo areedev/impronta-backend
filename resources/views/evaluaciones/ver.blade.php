@@ -346,7 +346,7 @@
                                                         <td
                                                             class="{{ in_array($item->competencia->id, $brechas) ? 'bg-danger text-white' : '' }}">
                                                             {{ $item->competencia->nombre }}
-                                                            @if ($resultado->comentario)
+                                                            @if ($resultado && $resultado->comentario)
                                                                 <hr>
                                                                 <p><span class="fw-bold">Comentarios:</span>
                                                                     {{ $resultado->comentario }}</p>
