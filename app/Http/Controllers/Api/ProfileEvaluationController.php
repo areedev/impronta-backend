@@ -105,6 +105,23 @@ class ProfileEvaluationController extends BaseApiController
         }
     }
 
+    function eliminar_seccion(Request $request)
+    {
+        $this->validate($request, [
+            'seccion' => 'required',
+        ]);
+        $seccion = SeccionPerfilEvaluacion::find($request->seccion);
+        if ($seccion) {
+            $seccion->delete();
+            $data = [
+                "status" => true,
+            ];
+            return $this->sendResponse($data, 'Sección eliminada exitosamente.');
+        } else {
+            return $this->sendError('Error', 'Sección no encontrada.', 400);
+        }
+    }
+
     function nueva_columna(Request $request)
     {
         $this->validate($request, [
@@ -120,6 +137,23 @@ class ProfileEvaluationController extends BaseApiController
             return $this->sendResponse(['item'=>$item, 'items'=>$items, 'types'=>$tipos], 'Column created successfully');
         } else {
             return $this->sendError('Failed', 'Failed', 400);
+        }
+    }
+
+    function eliminar_columna(Request $request)
+    {
+        $this->validate($request, [
+            'item' => 'required',
+        ]);
+        $item = ItemSeccionPerfilEvaluacion::find($request->item);
+        if ($item) {
+            $item->delete();
+            $data = [
+                "status" => true,
+            ];
+            return $this->sendResponse($data, 'Columna eliminada exitosamente.');
+        } else {
+            return $this->sendError('Error', 'Columna no encontrada.', 400);
         }
     }
 

@@ -58,6 +58,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update/{id}', [ProfileEvaluationController::class, 'update']);
     Route::post('/profile/new-section', [ProfileEvaluationController::class, 'nueva_seccion']);
     Route::post('/profile/new-column', [ProfileEvaluationController::class, 'nueva_columna']);
+    Route::post('profile/remove-column', [ProfileEvaluationController::class, 'eliminar_columna']);
+    Route::post('profile/remove-section', [ProfileEvaluationController::class, 'eliminar_seccion']);
+
     Route::post('/profile/competencies', [ProfileEvaluationController::class, 'competencies']);
     Route::delete('/profile/{id}', [ProfileEvaluationController::class, 'destroy']);
     Route::get('/profile/edit/{id}', [ProfileEvaluationController::class, 'edit']);

@@ -77,25 +77,27 @@ class EvaluationController extends BaseApiController
         $evaluacion->faena;
         $evaluacion->area;
 
-        $evaluacion->nota_total = $evaluacion->getNotaTotalAttribute();
-        $evaluacion->porcentaje_total = $evaluacion->getPorcentajeTotalAttribute();
-        $evaluacion->teorica->nota_total = $evaluacion->teorica->getNotaTotalAttribute();
-        $evaluacion->teorica->porcentaje_total = $evaluacion->teorica->getPorcentajeTotalAttribute();
+        if ($evaluacion->teorica && $evaluacion->resultado) {
+            $evaluacion->nota_total = $evaluacion->getNotaTotalAttribute();
+            $evaluacion->porcentaje_total = $evaluacion->getPorcentajeTotalAttribute();
+            $evaluacion->teorica->nota_total = $evaluacion->teorica->getNotaTotalAttribute();
+            $evaluacion->teorica->porcentaje_total = $evaluacion->teorica->getPorcentajeTotalAttribute();
 
-        $evaluacion->teorica->items = $evaluacion->teorica->items;
-        $evaluacion->teorica->items->each(function($item) {
-            $item->competencia;
-        });
-        $evaluacion->teorica->porcentaje_teorica = $evaluacion->teorica->getPorcentajeTeoricaAttribute();
-        $evaluacion->nota_practica = $evaluacion->getNotaPracticaAttribute();
-        $evaluacion->porcentaje_practica = $evaluacion->getPorcentajePracticaAttribute();
+            $evaluacion->teorica->items = $evaluacion->teorica->items;
+            $evaluacion->teorica->items->each(function($item) {
+                $item->competencia;
+            });
+            $evaluacion->teorica->porcentaje_teorica = $evaluacion->teorica->getPorcentajeTeoricaAttribute();
+            $evaluacion->nota_practica = $evaluacion->getNotaPracticaAttribute();
+            $evaluacion->porcentaje_practica = $evaluacion->getPorcentajePracticaAttribute();
+        }
         $evaluacion->perfilEvaluacion->secciones;
         $evaluacion->perfilEvaluacion->secciones->each(function ($section) {
             $section->items;
             $section->items->each(function ($item) {
                 $item->competencia;
-                $item->competencia->criterios;
-
+                if ($item->competencia != NULL)
+                    $item->competencia->criterios;
             });
         });
 
@@ -115,7 +117,8 @@ class EvaluationController extends BaseApiController
             $section->items;
             $section->items->each(function ($item) {
                 $item->competencia;
-                $item->competencia->criterios;
+                if ($item->competencia != NULL)
+                    $item->competencia->criterios;
 
             });
         });
