@@ -134,6 +134,7 @@ class ProfileEvaluationController extends BaseApiController
             $items = ItemPerfilEvaluacion::get();
             $tipos = TipoCompetencia::get();
             $seccion = $request->seccion;
+            ItemSeccionPerfilEvaluacion::find($item->id)->delete();
             return $this->sendResponse(['item'=>$item, 'items'=>$items, 'types'=>$tipos], 'Column created successfully');
         } else {
             return $this->sendError('Failed', 'Failed', 400);
@@ -148,13 +149,8 @@ class ProfileEvaluationController extends BaseApiController
         $item = ItemSeccionPerfilEvaluacion::find($request->item);
         if ($item) {
             $item->delete();
-            $data = [
-                "status" => true,
-            ];
-            return $this->sendResponse($data, 'Columna eliminada exitosamente.');
-        } else {
-            return $this->sendError('Error', 'Columna no encontrada.', 400);
         }
+        return $this->sendResponse(["status" => true], 'Columna eliminada exitosamente.');
     }
 
     function competencies(Request $request){
@@ -203,7 +199,10 @@ class ProfileEvaluationController extends BaseApiController
                                     ['competencia_id' => $item]
                                 );
                              } else {
-                                ItemSeccionPerfilEvaluacion::find($llaveitem)->delete();
+                                $item = ItemSeccionPerfilEvaluacion::find($llaveitem);
+                                if ($item) {
+                                    $item->delete();
+                                }
                              }
                         }
                     }

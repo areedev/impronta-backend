@@ -114,7 +114,10 @@ class PerfilEvaluacionController extends Controller
                                     ['competencia_id' => $item]
                                 );
                              } else {
-                                ItemSeccionPerfilEvaluacion::find($llaveitem)->delete();
+                                $item = ItemSeccionPerfilEvaluacion::find($llaveitem);
+                                if ($item) {
+                                    $item->delete();
+                                }
                              }
                         }
                     }
@@ -155,6 +158,7 @@ class PerfilEvaluacionController extends Controller
             $items = ItemPerfilEvaluacion::pluck('nombre', 'id');
             $tipos = TipoCompetencia::pluck('abreviatura','id');
             $seccion = $request->seccion;
+            ItemSeccionPerfilEvaluacion::find($item->id)->delete();
             $view =  view('perfilevaluacion.columna', compact('items', 'item', 'tipos'));
             return ['html' => $view->render()];
         }
@@ -205,11 +209,8 @@ class PerfilEvaluacionController extends Controller
         $item = ItemSeccionPerfilEvaluacion::find($request->item);
         if ($item) {
             $item->delete();
-            $data = [
-                "status" => true,
-            ];
-            return response()->json($data);
         }
+        return response()->json(["status" => true]);
     }
 
     function nueva_seccion(Request $request)
